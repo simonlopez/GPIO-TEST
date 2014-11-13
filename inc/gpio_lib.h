@@ -1,6 +1,8 @@
 #ifndef _GPIO_LIB_H_
 #define _GPIO_LIB_H_
 
+#include <stdint.h>
+
 #if defined(RK3188)
 #define PIN_BASE	160
 #define NUM_GROUP	32

@@ -11,11 +11,15 @@
 #
 #-----------------------------------------------------------
 
-ifeq ($(BOARD),AM3352-SOM)
+ifndef BOARD	
+$(error No board defined)
+endif
+
+ifeq ($(BOARD),AM3352_SOM)
 	CHIP = AM3352
 endif
 
-ifeq ($(BOARD),RK3188-SOM)
+ifeq ($(BOARD),RK3188_SOM)
 	CHIP = RK3188
 endif
 
@@ -31,7 +35,7 @@ COMPILER = $(CROSS_COMPILE)
 endif
 
 
-CFLAGS = -Wall -std=c99 -D $(BOARD) -D $(CHIP) -I./inc/
+CFLAGS = -Wall -std=c99 -D $(CHIP) -D $(BOARD) -I./inc/
 LINKER = $(COMPILER) -o
 LFLAGS = -Wall -I./inc/
 
@@ -47,32 +51,20 @@ rm = rm -f
 
 
 
-all:
-	@echo "asddd"
-#	ifndef BOARD
-	#$(error There is no BOARD defined. Run "make help" for available platforms)	
-	#endif
-	#make_target	
+all: make_target
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 		@$(CC) $(CFLAGS) -c $< -o $@
 		@echo "Compiled "$<" successfully"
 		
-$(BINDIR)/$(TARGET): $(OBJECTS)
+$(BINDIR)/$(BOARD): $(OBJECTS)
 		@$(LINKER) $@ $(LFLAGS) $(OBJECTS)
 		@echo "Linking complete!"
 		
 	
+.PHONY: make_target
 make_target: $(OBJECTS) $(BINDIR)/$(BOARD)
 
-	
-.PHONY: help
-help:
-	@echo "Available boards:"
-	@echo "=================="
-	@echo "AM3352-SOM"
-	@echo "RK3188-SOM"
-	@echo ""	
 	
 .PHONY: clean
 clean:
@@ -81,5 +73,5 @@ clean:
 	
 .PHONY: remove
 remove: clean
-	@$(rm) $(BINDIR)/$(TARGET)
+	@$(rm) $(BINDIR)/$(BOARD)
 	@echo "Exacutable removed!"

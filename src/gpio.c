@@ -24,24 +24,20 @@
 #include "../inc/color.h"
 #include "../inc/gpio_lib.h"
 #if defined (RK3188)
-#error "RockChip defined"
-#include "../inc/EXT.h"
 #elif defined (AM3352)
-#error "Texas defined"
 #endif
+
 #include "../inc/test.h"
 
 int main(int argc, char **argv)
-{	
-    printf("\f");
-    printf("\n");
-    printf("RK3188-SOM GPIO TEST\n\n");
+{
+#if defined (RK3188_SOM)
+	printf("RK3188-SOM TEST\n");
+#endif
 
-    test("UEXT-1", uext1, uext1_pp, sizeof(uext1)/sizeof(gpio_t));
-    test("UEXT-2", uext2, uext2_pp, sizeof(uext2)/sizeof(gpio_t));
-    test("EXT-1", ext1, ext1_pp, sizeof(ext1)/sizeof(gpio_t));
-    test("EXT-2", ext2, ext2_pp, sizeof(ext2)/sizeof(gpio_t));
-
+#if defined (AM3352_SOM)
+	printf("AM3352-SOM TEST\n");
+#endif
 
 	return 0;
 }
