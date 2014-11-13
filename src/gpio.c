@@ -23,7 +23,12 @@
 #include <unistd.h>
 #include "../inc/color.h"
 #include "../inc/gpio_lib.h"
+#if defined (RK3188)
+#error "RockChip defined"
 #include "../inc/EXT.h"
+#elif defined (AM3352)
+#error "Texas defined"
+#endif
 #include "../inc/test.h"
 
 int main(int argc, char **argv)

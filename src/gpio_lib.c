@@ -6,11 +6,18 @@
 #include <stdio.h>
 #include <errno.h>
 
-gpio_base_t gpio[] = { { 0, GPIO0_IO_BASE }, { 0, GPIO1_IO_BASE }, { 0,
-GPIO2_IO_BASE }, { 0, GPIO3_IO_BASE }, };
+#if defined(RK3188)
+gpio_base_t gpio[] = {
+		{ 0, GPIO0_IO_BASE },
+		{ 0, GPIO1_IO_BASE },
+		{ 0, GPIO2_IO_BASE },
+		{ 0, GPIO3_IO_BASE },
+};
+
 
 unsigned int iomux = 0;
 unsigned int pmu = 0;
+#endif
 
 int gpio_init(void) {
 	int fd;
