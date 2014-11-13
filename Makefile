@@ -7,13 +7,25 @@
 # Changelog:
 # 2013-06-27	-	Initial release
 # 15 OCT 2014	-	Modified for RK3188
+# 13 NOV 2014	-	Made general version
 #
 #-----------------------------------------------------------
 
-TARGET	=	RK3188-SOM-GPIO
-CC		=	gcc
+# Force user to supply target
+ifdef TARGET
+TARGET	=	$(TARGET)
+else
+$(error No target is defined)
+endif
+
+ifdef CC
+COMPILER = $(CC)
+else
+COMPILER = gcc
+endif
+
 CFLAGS	=	-Wall -std=c99 -I./inc/
-LINKER	=	$(CC) -o
+LINKER	=	$(COMPILER) -o
 LFLAGS	=	-Wall -I./inc/
 
 SRCDIR	=	src
@@ -26,15 +38,18 @@ INCLUDES	:=	$(wildcard $(INCDIR)/*.h)
 OBJECTS		:=	$(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 rm			=	rm -f
 
+	 
+
+all: $(OBJECTS) $(BINDIR)/$(TARGET)
+	
+
+$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
+		@$(CC) $(CFLAGS) -c $< -o $@
+		@echo "Compiled "$<" successfully"
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
 		@$(LINKER) $@ $(LFLAGS) $(OBJECTS)
 		@echo "Linking complete!"
-		
-$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
-		@$(CC) $(CFLAGS) -c $< -o $@
-		@echo "Compiled "$<" successfully"
-	
 		
 	
 	
@@ -43,7 +58,7 @@ clean:
 	@$(rm) $(OBJECTS)
 	@echo "Cleanup complete!"
 	
-.PHONE: remove
+.PHONY: remove
 remove: clean
 	@$(rm) $(BINDIR)/$(TARGET)
 	@echo "Exacutable removed!"
