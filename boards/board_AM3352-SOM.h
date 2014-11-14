@@ -1,5 +1,5 @@
-#ifndef _EXT_H
-#define _EXT_H
+#ifndef _BOARD_AM3352_SOM_H
+#define _BOARD_AM3352_SOM_H
 
 #include "test.h"
 

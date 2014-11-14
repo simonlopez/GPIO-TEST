@@ -41,8 +41,8 @@ extern int16_t gpio_output(uint16_t pin, uint16_t val);
 
 #if defined(RK3188) || defined(AM3352)
 typedef struct {
-	uint16_t gpio_pio_base;
-	uint16_t swgpio_io_base;
+	uint32_t gpio_pio_base;
+	uint32_t swgpio_io_base;
 } gpio_base_t;
 
 #if defined(RK3188)
@@ -195,8 +195,8 @@ struct gpio_reg {
 	uint32_t : 32;					// @ 188h
 	uint32_t : 32;					// @ 18Ch
 
-	uint32_t cleardataout;			// @ 190h
-	uint32_t setdataout;			// @ 194h
+	uint32_t gpio_cleardataout;		// @ 190h
+	uint32_t gpio_setdataout;		// @ 194h
 
 
 };

@@ -1,5 +1,5 @@
-#ifndef _EXT_H
-#define _EXT_H
+#ifndef _BOARD_RK3188_SOM_H
+#define _BOARD_RK3188_SOM_H
 
 #include "gpio_lib.h"
 #include "test.h"

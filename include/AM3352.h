@@ -6,4 +6,7 @@
 #define GPIO2_IO_BASE 		0x481ac000
 #define GPIO3_IO_BASE 		0x481ae000
 
+#define GPIO_NUM(pin)		pin % 32
+#define GPIO_BANK(pin)		pin / 32
+#define GPIO_OFFSET(pin)	1u << (pin % 32)
 #endif

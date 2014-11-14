@@ -24,12 +24,13 @@
 #include "color.h"
 #include "gpio_lib.h"
 
+#if 0
 #if defined (RK3188)
 #include "board_RK3188-SOM.h"
 #elif defined (AM3352)
 #include "board_AM3352-SOM.h"
 #endif
-
+#endif
 #include "test.h"
 
 int main(int argc, char **argv)

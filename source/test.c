@@ -23,9 +23,12 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include "../inc/test.h"
-#include "../inc/gpio_lib.h"
-#include "../inc/color.h"
+
+#include "test.h"
+#include "gpio_lib.h"
+#include "color.h"
+
+#include "board_AM3352-SOM.h"
 
 int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 
@@ -40,15 +43,27 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 	if (gpio_init())
 		return 0;
 
-	/*
-	 * Export all GPIO-s
-	 */
+	gpio_set_cfgpin(PIN(3, 20), GPIO_OUTPUT);
+	gpio_set_cfgpin(PIN(3, 21), GPIO_OUTPUT);
+
+	while(1){
+		gpio_output(PIN(3, 20), 1);
+		gpio_output(PIN(3, 21), 0);
+		sleep(1);
+		gpio_output(PIN(3, 20), 0);
+		gpio_output(PIN(3, 21), 1);
+		sleep(1);
+	}
+
+#if defined(RK3188)
+	/* If using RK3188 make all needed pins as gpio */
 	gpio_make_gpio(pullpin.pin);
 
 	for (i = 0; i < n; i++) {
 		gpio_make_gpio(connector[i].pin);
 		usleep(delay);
 	}
+#endif
 	/* 1. Pull-Pin output */
 	gpio_set_cfgpin(pullpin.pin, GPIO_OUTPUT);
 
@@ -57,11 +72,12 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 		gpio_set_cfgpin(connector[i].pin, GPIO_INPUT);
 	}
 
-
+#if defined(RK3188)
 	for (i = 0; i < n; i++) {
 		gpio_set_pullup(connector[i].pin, GPIO_PULL_DIS);
 		usleep(delay);
 	}
+#endif
 
 
 	/* 3. Pull-Pin High */
@@ -112,8 +128,8 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 		goto fail;
 	fail = 0;
 
-	/* 7. Runing zero */
-	printf("Runing zero...");
+	/* 7. Running zero */
+	printf("Running zero...");
 	gpio_output(pullpin.pin, 1);
 	usleep(delay);
 
@@ -145,8 +161,8 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 		goto fail;
 	fail = 0;
 
-	/* 8. Runing one */
-	printf("Runing one...");
+	/* 8. Running one */
+	printf("Running one...");
 	gpio_output(pullpin.pin, 0);
 	usleep(delay);
 
@@ -181,10 +197,8 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 		goto fail;
 	fail = 0;
 
-	/*
-	 * UNEXPORT PINS
-	 */
-	fail: return 0;
+fail:
+	return 0;
 
 }
 
