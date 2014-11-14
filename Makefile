@@ -17,10 +17,10 @@ endif
 
 ifeq ($(BOARD),AM3352_SOM)
 	CHIP = AM3352
-endif
-
-ifeq ($(BOARD),RK3188_SOM)
+else ifeq ($(BOARD),RK3188_SOM)
 	CHIP = RK3188
+else
+$(error No matching board)
 endif
 
 
@@ -35,14 +35,15 @@ COMPILER = $(CROSS_COMPILE)
 endif
 
 
-CFLAGS = -Wall -std=c99 -D $(CHIP) -D $(BOARD) -I./inc/
-LINKER = $(COMPILER) -o
-LFLAGS = -Wall -I./inc/
-
-SRCDIR = src
-INCDIR = inc
+SRCDIR = source
+INCDIR = include
 OBJDIR = obj
 BINDIR = bin
+BRDDIR = boards
+
+CFLAGS = -Wall -std=c99 -D $(CHIP) -D $(BOARD) -I./$(INCDIR)/ -I./$(BRDDIR)
+LINKER = $(COMPILER) -o
+LFLAGS = -Wall -I./$(INCDIR)/ -I./$(BRDDIR)
 
 SOURCES := $(wildcard $(SRCDIR)/*.c)
 INCLUDES := $(wildcard $(INCDIR)/*.h)
@@ -50,8 +51,7 @@ OBJECTS := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 rm = rm -f
 
 
-
-all: make_target
+all: $(OBJECTS) $(BINDIR)/$(BOARD)
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 		@$(CC) $(CFLAGS) -c $< -o $@
@@ -60,10 +60,6 @@ $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 $(BINDIR)/$(BOARD): $(OBJECTS)
 		@$(LINKER) $@ $(LFLAGS) $(OBJECTS)
 		@echo "Linking complete!"
-		
-	
-.PHONY: make_target
-make_target: $(OBJECTS) $(BINDIR)/$(BOARD)
 
 	
 .PHONY: clean

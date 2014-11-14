@@ -21,13 +21,16 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include "../inc/color.h"
-#include "../inc/gpio_lib.h"
+#include "color.h"
+#include "gpio_lib.h"
+
 #if defined (RK3188)
+#include "board_RK3188-SOM.h"
 #elif defined (AM3352)
+#include "board_AM3352-SOM.h"
 #endif
 
-#include "../inc/test.h"
+#include "test.h"
 
 int main(int argc, char **argv)
 {

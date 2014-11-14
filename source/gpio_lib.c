@@ -1,23 +1,23 @@
-#include "../inc/gpio_lib.h"
-
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
 
-#if defined(RK3188)
+#if defined(RK3188) || defined(AM3352)
 gpio_base_t gpio[] = {
 		{ 0, GPIO0_IO_BASE },
 		{ 0, GPIO1_IO_BASE },
 		{ 0, GPIO2_IO_BASE },
 		{ 0, GPIO3_IO_BASE },
 };
+#endif
 
-
+#if defined(RK3188)
 unsigned int iomux = 0;
 unsigned int pmu = 0;
 #endif
+
 
 int gpio_init(void) {
 	int fd;
@@ -51,9 +51,6 @@ int gpio_init(void) {
 		gpio[i].gpio_pio_base += addr_offset;
 	}
 
-	/*
-	 * Additionally mmap GRF - iomux register @ 0x20008000
-	 */
 
 	addr_start = GPIO_GRF_BASE & PageMask;
 	addr_offset = GPIO_GRF_BASE & ~PageMask;
