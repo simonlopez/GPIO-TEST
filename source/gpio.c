@@ -43,6 +43,7 @@ int main(int argc, char **argv)
 	printf("AM3352-SOM TEST\n");
 #endif
 
+	gpio_init();
 	return 0;
 }
 
