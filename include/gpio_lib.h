@@ -18,6 +18,11 @@
 #define GPIO_PULL_UP		1
 #define GPIO_PULL_DOWN		2
 
+#define __DEBUG
+#ifdef __DEBUG
+#define debug(...) printf(__VA_ARGS__)
+#endif
+
 extern int16_t gpio_init(void);
 
 #if defined(RK3188)
@@ -69,6 +74,7 @@ struct gpio_reg {
 #endif
 
 #if defined(AM3352)
+#if 0
 struct gpio_reg {
 	uint32_t gpio_revision;			// @ 00h
 	uint32_t : 32;					// @ 04h
@@ -197,8 +203,49 @@ struct gpio_reg {
 
 	uint32_t gpio_cleardataout;		// @ 190h
 	uint32_t gpio_setdataout;		// @ 194h
+};
+#endif
+struct gpio_reg {
+	uint32_t gpio_revision;			// @ 00h
+	uint32_t junk0[3];					// @ 04h
+
+	uint32_t gpio_sysconfig;		// @ 10h
+	uint32_t junk1[4];
+
+	uint32_t gpio_irqstatus_raw_0; 	// @ 24h
+	uint32_t gpio_irqstatus_raw_1; 	// @ 28h
+	uint32_t gpio_irqstatus_0;     	// @ 2Ch
+
+	uint32_t gpio_irqstatus_1;     	// @ 30h
+	uint32_t gpio_irqstatus_set_0; 	// @ 34h
+	uint32_t gpio_irqstatus_set_1; 	// @ 38h
+	uint32_t gpio_irqstatus_clr_0; 	// @ 3Ch
+
+	uint32_t gpio_irqstatus_clr_1; 	// @ 40h
+	uint32_t gpio_irqwaken_0;		// @ 44h
+	uint32_t gpio_irqwaken_1;		// @ 48h
 
 
+	uint32_t junk2[50];					// @ 110h
+	uint32_t gpio_sysstatus;		// @ 114h
+	uint32_t junk3[6];
+
+	uint32_t gpio_ctrl;				// @ 130h
+	uint32_t gpio_oe;				// @ 134h
+	uint32_t gpio_datain;			// @ 138h
+	uint32_t gpio_dataout;			// @ 13Ch
+
+	uint32_t gpio_leveldetect0;		// @ 140h
+	uint32_t gpio_leveldetect1;		// @ 144h
+	uint32_t gpio_risingdetect;		// @ 148h
+	uint32_t gpio_fallingdetect;	// @ 14Ch
+
+	uint32_t gpio_debouncenable;	// @ 150h
+	uint32_t gpio_debouncingtime;	// @ 154h
+	uint32_t junk4[10];
+
+	uint32_t gpio_cleardataout;		// @ 190h
+	uint32_t gpio_setdataout;		// @ 194h
 };
 #endif
 

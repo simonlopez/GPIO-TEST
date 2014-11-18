@@ -43,7 +43,11 @@ int main(int argc, char **argv)
 	printf("AM3352-SOM TEST\n");
 #endif
 
-	gpio_init();
+	if(gpio_init() < 0){
+		printf("Error gpio init\n");
+	}
+
+	gpio_set_cfgpin(116, GPIO_OUTPUT);
 	return 0;
 }
 
