@@ -136,7 +136,7 @@ int gpio_set_pullup(unsigned int pin, unsigned int pull) {
 	}
 
 	if (pin < RK30_PIN0_PB4) {
-		unsigned int *base = (unsigned int *) (pmu + PMU_GPIO0A_PULL
+		unsigned long *base = (unsigned long *) (pmu + PMU_GPIO0A_PULL
 				+ ((offset / 8) * 4));
 		offset = (offset % 8) * 2;
 
@@ -145,7 +145,7 @@ int gpio_set_pullup(unsigned int pin, unsigned int pull) {
 		value |= (0x03 << (16 + offset) | (pull << offset));
 		*base = value;
 	} else {
-		unsigned int *base = (unsigned int *) (iomux + GRF_GPIO0B_PULL - 4
+		unsigned long *base = (unsigned long *) (iomux + GRF_GPIO0B_PULL - 4
 				+ bank * 16 + ((offset / 8) * 4));
 
 		unsigned long value = *base;

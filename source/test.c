@@ -23,11 +23,18 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "test.h"
 #include "gpio_lib.h"
 #include "color.h"
 
+static const char padder[] = "........................................";
+
+#define _print(...)		printf("%s%s%s",BOLD_WHITE, __VA_ARGS__, ESC); \
+						printf("%s", padder+strlen(__VA_ARGS__));
+#define print_fail()	printf("[%sFail%s]\n", RED, ESC)
+#define print_success() printf("[%sDone%s]\n", GREEN, ESC)
 
 int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 
@@ -38,14 +45,11 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 	int j;
 	int delay = 10000;
 
-	printf("\n%sTest %s%s\n", WHITE, name, ESC);
+	printf("\n%sTesting%s %s%s%s\n", BOLD_WHITE, ESC, UL_YELLOW, name, ESC);
 	printf("--------------------\n");
-
 
 	if (gpio_init())
 		return 0;
-
-
 
 #if defined(RK3188)
 	/* If using RK3188 make all needed pins as gpio */
@@ -72,33 +76,32 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 	}
 #endif
 
-
 	/* 3. Pull-Pin High */
-	printf("All HIGH...");
+	_print("Pull pin high");
 	gpio_output(pullpin.pin, 1);
 	usleep(delay);
-
 
 	/* 4. Read inputs */
 	for (i = 0; i < n; i++) {
 		if (!gpio_input(connector[i].pin)) {
 			//GND short
 			if (!fail) {
-				printf("%sFail\n%s", RED, ESC);
+				print_fail();
 				fail = 1;
 			}
-			printf("\t%s%s(%s:%d)%s -> GND SHORT\n", WHITE, connector[i].name,
-					connector[i].ext, connector[i].con, ESC);
+			printf("\t%s%s(%s:%d)%s -> GND SHORT\n", BOLD_CYAN,
+					connector[i].name, connector[i].ext, connector[i].con, ESC);
 		}
 	}
-	if (!fail)
-		printf("%sDone%s\n", GREEN, ESC);
-	else
+	if (!fail) {
+		print_success();
+	} else {
 		goto fail;
+	}
 	fail = 0;
 
 	/* 5. Pull-Pin Low */
-	printf("All LOW...");
+	_print("Pull pin low");
 	gpio_output(pullpin.pin, 0);
 	usleep(delay);
 
@@ -107,22 +110,22 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 		if (gpio_input(connector[i].pin)) {
 			//VCC short
 			if (!fail) {
-				printf("%sFail\n%s", RED, ESC);
+				print_fail();
 				fail = 1;
 			}
-			printf("\t%s%s(%s:%d)%s -> VCC SHORT\n", WHITE, connector[i].name,
-					connector[i].ext, connector[i].con, ESC);
+			printf("\t%s%s(%s:%d)%s -> VCC SHORT\n", BOLD_CYAN,
+					connector[i].name, connector[i].ext, connector[i].con, ESC);
 		}
 	}
 
 	if (!fail)
-		printf("%sDone%s\n", GREEN, ESC);
+		print_success();
 	else
 		goto fail;
 	fail = 0;
 
 	/* 7. Running zero */
-	printf("Running zero...");
+	_print("Running zero");
 	gpio_output(pullpin.pin, 1);
 	usleep(delay);
 
@@ -136,26 +139,28 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 				continue;
 			if (!gpio_input(connector[j].pin)) {
 				if (!fail) {
-					printf("%sFail\n%s", RED, ESC);
+					print_fail();
 					fail = 1;
 				}
 				printf("\t%s%s(%s:%d)%s -> %s%s(%s:%d)%s  SHORT\n",
-				WHITE, connector[i].name, connector[i].ext, connector[i].con,
-				ESC,
-				WHITE, connector[j].name, connector[i].ext, connector[j].con,
+				BOLD_CYAN, connector[i].name, connector[i].ext,
+						connector[i].con,
+						ESC,
+						BOLD_CYAN, connector[j].name, connector[i].ext,
+						connector[j].con,
 						ESC);
 			}
 		}
 		gpio_set_cfgpin(connector[i].pin, GPIO_INPUT);
 	}
 	if (!fail)
-		printf("%sDone%s\n", GREEN, ESC);
+		print_success();
 	else
 		goto fail;
 	fail = 0;
 
 	/* 8. Running one */
-	printf("Running one...");
+	_print("Running one");
 	gpio_output(pullpin.pin, 0);
 	usleep(delay);
 
@@ -169,29 +174,29 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 				continue;
 			if (gpio_input(connector[j].pin)) {
 				if (!fail) {
-					printf("%sFail\n%s", RED, ESC);
+					print_fail();
 					fail = 1;
 
 				}
 				printf("\t%s%s(%s:%d)%s -> %s%s(%s:%d)%s  SHORT\n",
-				WHITE, connector[i].name, connector[i].ext, connector[i].con,
-				ESC,
-				WHITE, connector[j].name, connector[i].ext, connector[j].con,
+				BOLD_CYAN, connector[i].name, connector[i].ext,
+						connector[i].con,
+						ESC,
+						BOLD_CYAN, connector[j].name, connector[i].ext,
+						connector[j].con,
 						ESC);
-
 
 			}
 		}
 		gpio_set_cfgpin(connector[i].pin, GPIO_INPUT);
 	}
 	if (!fail)
-		printf("%sDone%s\n", GREEN, ESC);
+		print_success();
 	else
 		goto fail;
 	fail = 0;
 
-fail:
-	return 0;
+	fail: return 0;
 
 }
 
