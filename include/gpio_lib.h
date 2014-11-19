@@ -18,234 +18,236 @@
 #define GPIO_PULL_UP		1
 #define GPIO_PULL_DOWN		2
 
-#define __DEBUG
+//#define __DEBUG
 #ifdef __DEBUG
 #define debug(...) printf(__VA_ARGS__)
+#else
+#define debug(...)
 #endif
 
-extern int16_t gpio_init(void);
+extern int gpio_init(void);
 
 #if defined(RK3188)
 /* FIXME: Rework RK3188 pin mux */
-extern int16_t gpio_make_gpio(uint16_t pin);
+extern int gpio_make_gpio(unsigned int pin);
 /* TODO: Add pull-up implementation for AM3352 */
-extern int16_t gpio_set_pullup(uint16_t pin, uint16_t pull);
+extern int gpio_set_pullup(unsigned int pin, unsigned int pull);
 #endif
 
 #if defined (AM3352)
-extern int16_t gpio_get_mux(uint16_t pin);
-extern int16_t gpio_set_mux(uint16_t pin);
+extern int gpio_get_mux(unsigned int pin);
+extern int gpio_set_mux(unsigned int pin);
 #endif
 
 /* Read/write direction functions */
-extern int16_t gpio_set_cfgpin(uint16_t pin, uint16_t val);
-extern int16_t gpio_get_cfgpin(uint16_t pin);
+extern int gpio_set_cfgpin(unsigned int pin, unsigned int val);
+extern int gpio_get_cfgpin(unsigned int pin);
 
-extern int16_t gpio_input(uint16_t pin);
-extern int16_t gpio_output(uint16_t pin, uint16_t val);
+extern int gpio_input(unsigned int pin);
+extern int gpio_output(unsigned int pin, unsigned int val);
 
 #if defined(RK3188) || defined(AM3352)
 typedef struct {
-	uint32_t gpio_pio_base;
-	uint32_t swgpio_io_base;
+	unsigned int gpio_pio_base;
+	unsigned int swgpio_io_base;
 } gpio_base_t;
 
 #if defined(RK3188)
 struct gpio_int {
-	uint32_t gpio_inten;			// @ 0x30
-	uint32_t gpio_intmask;			// @ 0x34
-	uint32_t gpio_inttype_level;	// @ 0x38
-	uint32_t gpio_int_polarity;	// @ 0x3c
-	uint32_t gpio_int_status;		// @ 0x40
-	uint32_t gpio_int_rawstatus;	// @ 0x44
-	uint32_t gpio_debounce;		// @ 0x48
-	uint32_t gpio_ports_eoi;		// @ 0x4c
+	unsigned long gpio_inten;			// @ 0x30
+	unsigned long gpio_intmask;			// @ 0x34
+	unsigned long gpio_inttype_level;	// @ 0x38
+	unsigned long gpio_int_polarity;	// @ 0x3c
+	unsigned long gpio_int_status;		// @ 0x40
+	unsigned long gpio_int_rawstatus;	// @ 0x44
+	unsigned long gpio_debounce;		// @ 0x48
+	unsigned long gpio_ports_eoi;		// @ 0x4c
 
 };
 struct gpio_reg {
-	uint32_t gpio_swport_dr;		// @ 0x00
-	uint32_t gpio_swport_ddr;		// @ 0x04
-	uint32_t res[10];				// Reserved memory
+	unsigned long gpio_swport_dr;		// @ 0x00
+	unsigned long gpio_swport_ddr;		// @ 0x04
+	unsigned long res[10];				// Reserved memory
 	struct gpio_int gpio_int;
-	uint32_t gpio_ext_port;		// @ 0x50
-	uint32_t rsrv[3];
-	uint32_t gpio_ls_sync;			// @ 0x60;
+	unsigned long gpio_ext_port;		// @ 0x50
+	unsigned long rsrv[3];
+	unsigned long gpio_ls_sync;			// @ 0x60;
 };
 #endif
 
 #if defined(AM3352)
 #if 0
 struct gpio_reg {
-	uint32_t gpio_revision;			// @ 00h
-	uint32_t : 32;					// @ 04h
-	uint32_t : 32;					// @ 08h
-	uint32_t : 32;					// @ 0Ch
+	unsigned long gpio_revision;			// @ 00h
+	unsigned long : 32;					// @ 04h
+	unsigned long : 32;					// @ 08h
+	unsigned long : 32;					// @ 0Ch
 
-	uint32_t gpio_sysconfig;		// @ 10h
-	uint32_t : 32; 					// @ 14h
-	uint32_t : 32; 					// @ 18h
-	uint32_t : 32; 					// @ 1Ch
+	unsigned long gpio_sysconfig;		// @ 10h
+	unsigned long : 32; 					// @ 14h
+	unsigned long : 32; 					// @ 18h
+	unsigned long : 32; 					// @ 1Ch
 
-	uint32_t : 32; 					// @ 20h
-	uint32_t gpio_irqstatus_raw_0; 	// @ 24h
-	uint32_t gpio_irqstatus_raw_1; 	// @ 28h
-	uint32_t gpio_irqstatus_0;     	// @ 2Ch
+	unsigned long : 32; 					// @ 20h
+	unsigned long gpio_irqstatus_raw_0; 	// @ 24h
+	unsigned long gpio_irqstatus_raw_1; 	// @ 28h
+	unsigned long gpio_irqstatus_0;     	// @ 2Ch
 
-	uint32_t gpio_irqstatus_1;     	// @ 30h
-	uint32_t gpio_irqstatus_set_0; 	// @ 34h
-	uint32_t gpio_irqstatus_set_1; 	// @ 38h
-	uint32_t gpio_irqstatus_clr_0; 	// @ 3Ch
+	unsigned long gpio_irqstatus_1;     	// @ 30h
+	unsigned long gpio_irqstatus_set_0; 	// @ 34h
+	unsigned long gpio_irqstatus_set_1; 	// @ 38h
+	unsigned long gpio_irqstatus_clr_0; 	// @ 3Ch
 
-	uint32_t gpio_irqstatus_clr_1; 	// @ 40h
-	uint32_t gpio_irqwaken_0;		// @ 44h
-	uint32_t gpio_irqwaken_1;		// @ 48h
-	uint32_t : 32;					// @ 4Ch
+	unsigned long gpio_irqstatus_clr_1; 	// @ 40h
+	unsigned long gpio_irqwaken_0;		// @ 44h
+	unsigned long gpio_irqwaken_1;		// @ 48h
+	unsigned long : 32;					// @ 4Ch
 
-	uint32_t : 32;					// @ 50h
-	uint32_t : 32;					// @ 54h
-	uint32_t : 32;					// @ 58h
-	uint32_t : 32;					// @ 5Ch
+	unsigned long : 32;					// @ 50h
+	unsigned long : 32;					// @ 54h
+	unsigned long : 32;					// @ 58h
+	unsigned long : 32;					// @ 5Ch
 
-	uint32_t : 32;					// @ 60h
-	uint32_t : 32;					// @ 64h
-	uint32_t : 32;					// @ 68h
-	uint32_t : 32;					// @ 6Ch
+	unsigned long : 32;					// @ 60h
+	unsigned long : 32;					// @ 64h
+	unsigned long : 32;					// @ 68h
+	unsigned long : 32;					// @ 6Ch
 
-	uint32_t : 32;					// @ 70h
-	uint32_t : 32;					// @ 74h
-	uint32_t : 32;					// @ 78h
-	uint32_t : 32;					// @ 7Ch
+	unsigned long : 32;					// @ 70h
+	unsigned long : 32;					// @ 74h
+	unsigned long : 32;					// @ 78h
+	unsigned long : 32;					// @ 7Ch
 
-	uint32_t : 32;					// @ 80h
-	uint32_t : 32;					// @ 84h
-	uint32_t : 32;					// @ 88h
-	uint32_t : 32;					// @ 8Ch
+	unsigned long : 32;					// @ 80h
+	unsigned long : 32;					// @ 84h
+	unsigned long : 32;					// @ 88h
+	unsigned long : 32;					// @ 8Ch
 
-	uint32_t : 32;					// @ 90h
-	uint32_t : 32;					// @ 94h
-	uint32_t : 32;					// @ 98h
-	uint32_t : 32;					// @ 9Ch
+	unsigned long : 32;					// @ 90h
+	unsigned long : 32;					// @ 94h
+	unsigned long : 32;					// @ 98h
+	unsigned long : 32;					// @ 9Ch
 
-	uint32_t : 32;					// @ A0h
-	uint32_t : 32;					// @ A4h
-	uint32_t : 32;					// @ A8h
-	uint32_t : 32;					// @ ACh
+	unsigned long : 32;					// @ A0h
+	unsigned long : 32;					// @ A4h
+	unsigned long : 32;					// @ A8h
+	unsigned long : 32;					// @ ACh
 
-	uint32_t : 32;					// @ B0h
-	uint32_t : 32;					// @ B4h
-	uint32_t : 32;					// @ B8h
-	uint32_t : 32;					// @ BCh
+	unsigned long : 32;					// @ B0h
+	unsigned long : 32;					// @ B4h
+	unsigned long : 32;					// @ B8h
+	unsigned long : 32;					// @ BCh
 
-	uint32_t : 32;					// @ C0h
-	uint32_t : 32;					// @ C4h
-	uint32_t : 32;					// @ C8h
-	uint32_t : 32;					// @ CCh
+	unsigned long : 32;					// @ C0h
+	unsigned long : 32;					// @ C4h
+	unsigned long : 32;					// @ C8h
+	unsigned long : 32;					// @ CCh
 
-	uint32_t : 32;					// @ D0h
-	uint32_t : 32;					// @ D4h
-	uint32_t : 32;					// @ D8h
-	uint32_t : 32;					// @ DCh
+	unsigned long : 32;					// @ D0h
+	unsigned long : 32;					// @ D4h
+	unsigned long : 32;					// @ D8h
+	unsigned long : 32;					// @ DCh
 
-	uint32_t : 32;					// @ E0h
-	uint32_t : 32;					// @ E4h
-	uint32_t : 32;					// @ E8h
-	uint32_t : 32;					// @ ECh
+	unsigned long : 32;					// @ E0h
+	unsigned long : 32;					// @ E4h
+	unsigned long : 32;					// @ E8h
+	unsigned long : 32;					// @ ECh
 
-	uint32_t : 32;					// @ F0h
-	uint32_t : 32;					// @ F4h
-	uint32_t : 32;					// @ F8h
-	uint32_t : 32;					// @ FCh
+	unsigned long : 32;					// @ F0h
+	unsigned long : 32;					// @ F4h
+	unsigned long : 32;					// @ F8h
+	unsigned long : 32;					// @ FCh
 
-	uint32_t : 32;					// @ 100h
-	uint32_t : 32;					// @ 104h
-	uint32_t : 32;					// @ 108h
-	uint32_t : 32;					// @ 10Ch
+	unsigned long : 32;					// @ 100h
+	unsigned long : 32;					// @ 104h
+	unsigned long : 32;					// @ 108h
+	unsigned long : 32;					// @ 10Ch
 
-	uint32_t : 32;					// @ 110h
-	uint32_t gpio_sysstatus;		// @ 114h
-	uint32_t : 32;					// @ 118h
-	uint32_t : 32;					// @ 11Ch
+	unsigned long : 32;					// @ 110h
+	unsigned long gpio_sysstatus;		// @ 114h
+	unsigned long : 32;					// @ 118h
+	unsigned long : 32;					// @ 11Ch
 
-	uint32_t : 32;					// @ 120h
-	uint32_t : 32;					// @ 124h
-	uint32_t : 32;					// @ 128h
-	uint32_t : 32;					// @ 12Ch
+	unsigned long : 32;					// @ 120h
+	unsigned long : 32;					// @ 124h
+	unsigned long : 32;					// @ 128h
+	unsigned long : 32;					// @ 12Ch
 
-	uint32_t gpio_ctrl;				// @ 130h
-	uint32_t gpio_oe;				// @ 134h
-	uint32_t gpio_datain;			// @ 138h
-	uint32_t gpio_dataout;			// @ 13Ch
+	unsigned long gpio_ctrl;				// @ 130h
+	unsigned long gpio_oe;				// @ 134h
+	unsigned long gpio_datain;			// @ 138h
+	unsigned long gpio_dataout;			// @ 13Ch
 
-	uint32_t gpio_leveldetect0;		// @ 140h
-	uint32_t gpio_leveldetect1;		// @ 144h
-	uint32_t gpio_risingdetect;		// @ 148h
-	uint32_t gpio_fallingdetect;	// @ 14Ch
+	unsigned long gpio_leveldetect0;		// @ 140h
+	unsigned long gpio_leveldetect1;		// @ 144h
+	unsigned long gpio_risingdetect;		// @ 148h
+	unsigned long gpio_fallingdetect;	// @ 14Ch
 
-	uint32_t gpio_debouncenable;	// @ 150h
-	uint32_t gpio_debouncingtime;	// @ 154h
-	uint32_t : 32;					// @ 158h
-	uint32_t : 32;					// @ 15Ch
+	unsigned long gpio_debouncenable;	// @ 150h
+	unsigned long gpio_debouncingtime;	// @ 154h
+	unsigned long : 32;					// @ 158h
+	unsigned long : 32;					// @ 15Ch
 
-	uint32_t : 32;					// @ 160h
-	uint32_t : 32;					// @ 164h
-	uint32_t : 32;					// @ 168h
-	uint32_t : 32;					// @ 16Ch
+	unsigned long : 32;					// @ 160h
+	unsigned long : 32;					// @ 164h
+	unsigned long : 32;					// @ 168h
+	unsigned long : 32;					// @ 16Ch
 
-	uint32_t : 32;					// @ 170h
-	uint32_t : 32;					// @ 174h
-	uint32_t : 32;					// @ 178h
-	uint32_t : 32;					// @ 17Ch
+	unsigned long : 32;					// @ 170h
+	unsigned long : 32;					// @ 174h
+	unsigned long : 32;					// @ 178h
+	unsigned long : 32;					// @ 17Ch
 
-	uint32_t : 32;					// @ 180h
-	uint32_t : 32;					// @ 184h
-	uint32_t : 32;					// @ 188h
-	uint32_t : 32;					// @ 18Ch
+	unsigned long: 32;					// @ 180h
+	unsigned long: 32;					// @ 184h
+	unsigned long: 32;					// @ 188h
+	unsigned long: 32;					// @ 18Ch
 
-	uint32_t gpio_cleardataout;		// @ 190h
-	uint32_t gpio_setdataout;		// @ 194h
+	unsigned long gpio_cleardataout;		// @ 190h
+	unsigned long gpio_setdataout;		// @ 194h
 };
 #endif
 struct gpio_reg {
-	uint32_t gpio_revision;			// @ 00h
-	uint32_t junk0[3];					// @ 04h
+	unsigned long gpio_revision;			// @ 00h
+	unsigned long junk0[3];					// @ 04h
 
-	uint32_t gpio_sysconfig;		// @ 10h
-	uint32_t junk1[4];
+	unsigned long gpio_sysconfig;		// @ 10h
+	unsigned long junk1[4];
 
-	uint32_t gpio_irqstatus_raw_0; 	// @ 24h
-	uint32_t gpio_irqstatus_raw_1; 	// @ 28h
-	uint32_t gpio_irqstatus_0;     	// @ 2Ch
+	unsigned long gpio_irqstatus_raw_0; 	// @ 24h
+	unsigned long gpio_irqstatus_raw_1; 	// @ 28h
+	unsigned long gpio_irqstatus_0;     	// @ 2Ch
 
-	uint32_t gpio_irqstatus_1;     	// @ 30h
-	uint32_t gpio_irqstatus_set_0; 	// @ 34h
-	uint32_t gpio_irqstatus_set_1; 	// @ 38h
-	uint32_t gpio_irqstatus_clr_0; 	// @ 3Ch
+	unsigned long gpio_irqstatus_1;     	// @ 30h
+	unsigned long gpio_irqstatus_set_0; 	// @ 34h
+	unsigned long gpio_irqstatus_set_1; 	// @ 38h
+	unsigned long gpio_irqstatus_clr_0; 	// @ 3Ch
 
-	uint32_t gpio_irqstatus_clr_1; 	// @ 40h
-	uint32_t gpio_irqwaken_0;		// @ 44h
-	uint32_t gpio_irqwaken_1;		// @ 48h
+	unsigned long gpio_irqstatus_clr_1; 	// @ 40h
+	unsigned long gpio_irqwaken_0;		// @ 44h
+	unsigned long gpio_irqwaken_1;		// @ 48h
 
 
-	uint32_t junk2[50];					// @ 110h
-	uint32_t gpio_sysstatus;		// @ 114h
-	uint32_t junk3[6];
+	unsigned long junk2[50];					// @ 110h
+	unsigned long gpio_sysstatus;		// @ 114h
+	unsigned long junk3[6];
 
-	uint32_t gpio_ctrl;				// @ 130h
-	uint32_t gpio_oe;				// @ 134h
-	uint32_t gpio_datain;			// @ 138h
-	uint32_t gpio_dataout;			// @ 13Ch
+	unsigned long gpio_ctrl;				// @ 130h
+	unsigned long gpio_oe;				// @ 134h
+	unsigned long gpio_datain;			// @ 138h
+	unsigned long gpio_dataout;			// @ 13Ch
 
-	uint32_t gpio_leveldetect0;		// @ 140h
-	uint32_t gpio_leveldetect1;		// @ 144h
-	uint32_t gpio_risingdetect;		// @ 148h
-	uint32_t gpio_fallingdetect;	// @ 14Ch
+	unsigned long gpio_leveldetect0;		// @ 140h
+	unsigned long gpio_leveldetect1;		// @ 144h
+	unsigned long gpio_risingdetect;		// @ 148h
+	unsigned long gpio_fallingdetect;	// @ 14Ch
 
-	uint32_t gpio_debouncenable;	// @ 150h
-	uint32_t gpio_debouncingtime;	// @ 154h
-	uint32_t junk4[10];
+	unsigned long gpio_debouncenable;	// @ 150h
+	unsigned long gpio_debouncingtime;	// @ 154h
+	unsigned long junk4[10];
 
-	uint32_t gpio_cleardataout;		// @ 190h
-	uint32_t gpio_setdataout;		// @ 194h
+	unsigned long gpio_cleardataout;		// @ 190h
+	unsigned long gpio_setdataout;		// @ 194h
 };
 #endif
 

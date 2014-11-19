@@ -24,13 +24,12 @@
 #include "color.h"
 #include "gpio_lib.h"
 
-#if 0
-#if defined (RK3188)
+#if defined (RK3188_SOM)
 #include "board_RK3188-SOM.h"
-#elif defined (AM3352)
+#elif defined (AM3352_SOM)
 #include "board_AM3352-SOM.h"
 #endif
-#endif
+
 #include "test.h"
 
 int main(int argc, char **argv)
@@ -43,11 +42,21 @@ int main(int argc, char **argv)
 	printf("AM3352-SOM TEST\n");
 #endif
 
+#if defined (AM3352_SOM)
 	if(gpio_init() < 0){
 		printf("Error gpio init\n");
 	}
 
 	gpio_set_cfgpin(116, GPIO_OUTPUT);
+
+
+#elif defined (RK3188_SOM)
+	test("UEXT-1", uext1, uext1_pp, sizeof(uext1)/sizeof(gpio_t));
+
+
+#endif
+
+
 	return 0;
 }
 

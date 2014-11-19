@@ -165,4 +165,10 @@
 #define GPIO_BANK(pin)		pin >> 5
 #define GPIO_OFFSET(pin)	1u << (pin % 32)
 
+
+
+#define PINN(port, pin)	RK30_PIN ## port ## _P ## pin
+#define PIN(port, pin)	PINN(port, pin)
+
+
 #endif

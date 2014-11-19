@@ -23,16 +23,16 @@ gpio_base_t gpio[] = {
 #endif
 
 #if defined(RK3188)
-uint32_t iomux = 0;
-uint32_t pmu = 0;
+unsigned int iomux = 0;
+unsigned int pmu = 0;
 #endif
 
 
-int16_t gpio_init(void) {
-	int16_t fd;
+int gpio_init(void) {
+	int fd;
 
-	uint32_t addr_start, addr_offset;
-	uint16_t PageSize, PageMask;
+	unsigned int addr_start, addr_offset;
+	unsigned int PageSize, PageMask;
 	void *pc;
 
 	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
@@ -49,7 +49,7 @@ int16_t gpio_init(void) {
 	debug("%sPageSize%s: %d\n", BOLD_WHITE, ESC, PageSize);
 	debug("%sPageMask%s: 0x%08x\n", BOLD_WHITE, ESC, PageMask);
 
-	uint8_t i;
+	unsigned char i;
 	for (i = 0; i < 4; i++) {
 		addr_start = gpio[i].swgpio_io_base & PageMask;
 		addr_offset = gpio[i].swgpio_io_base & ~PageMask;
@@ -67,9 +67,9 @@ int16_t gpio_init(void) {
 			return (-1);
 		}
 
-		gpio[i].gpio_pio_base = (uint32_t) pc;
+		gpio[i].gpio_pio_base = (unsigned int) pc;
 		gpio[i].gpio_pio_base += addr_offset;
-		printf("%p mapped at: %p\n", (void *)gpio[i].swgpio_io_base, (void *)gpio[i].gpio_pio_base);
+		debug("%p mapped at: %p\n", (void *)gpio[i].swgpio_io_base, (void *)gpio[i].gpio_pio_base);
 	}
 
 #if defined(RK3188)
@@ -79,8 +79,9 @@ int16_t gpio_init(void) {
 	pc = (void *) mmap(0, PageSize * 2, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
 			addr_start);
 
-	iomux = (uint16_t) pc;
+	iomux = (unsigned int) pc;
 	iomux += addr_offset;
+	debug("%p mapped at: %p\n", (void *)GPIO_GRF_BASE, (void *)iomux);
 
 	addr_start = RK30_PMU_BASE & PageMask;
 	addr_offset = RK30_PMU_BASE & ~PageMask;
@@ -88,8 +89,9 @@ int16_t gpio_init(void) {
 	pc = (void *) mmap(0, PageSize * 2, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
 			addr_start);
 
-	pmu = (uint16_t) pc;
+	pmu = (unsigned int) pc;
 	pmu += addr_offset;
+	debug("%p mapped at: %p\n", (void *)RK30_PMU_BASE, (void *)pmu);
 #endif
 
 	close(fd);
@@ -99,84 +101,74 @@ int16_t gpio_init(void) {
 	return 0;
 }
 #if defined(RK3188)
-int16_t gpio_make_gpio(uint16_t pin) {
-	uint16_t gpio_num = GPIO_NUM(pin);		//23
-	uint16_t bank = GPIO_BANK(gpio_num);	// 0
-	uint16_t offset = (gpio_num % 32) / 8;			// 2
+int gpio_make_gpio(unsigned int pin) {
+	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
+	unsigned int gpio_num = GPIO_NUM(pin);		//23
+	unsigned int bank = GPIO_BANK(gpio_num);	// 0
+	unsigned int offset = (gpio_num % 32) / 8;			// 2
 
 	if (iomux == 0) {
 		return -1;
 	}
 
 	//0x20008060 + bank*0x10 + 4*(gpio_num / 8)
-	uint16_t *ptr = (uint16_t *) (iomux + GPIO_GRF_IOMUX + bank * 16
-			+ 4 * offset);
+	unsigned int *ptr = (unsigned int *) (iomux + GPIO_GRF_IOMUX + bank * 16
+				+ 4 * offset);
 
-	uint32_t value = *((uint32_t *) ptr)
+	unsigned long value = *((unsigned long *) ptr)
 			& ~(0x03 << 2 * (gpio_num % 8));
 	value |= 3 << (2 * (gpio_num % 8) + 16);
 
-	*((uint32_t*) ptr) = value;
+	*((unsigned long*) ptr) = value;
 
+	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 	return 0;
 }
 
-int16_t gpio_set_pullup(uint16_t pin, uint16_t pull) {
-	uint16_t gpio_num = GPIO_NUM(pin);
-	uint16_t bank = GPIO_BANK(gpio_num);
-	uint16_t offset = gpio_num % 32;
-
-#if 0
-	printf("\n-----------------\n");
-	printf("GPIO_NUM: %d\n", gpio_num);
-	printf("BANK: %d\n", bank);
-	printf("OFFSET: %d\n", offset);
-#endif
+int gpio_set_pullup(unsigned int pin, unsigned int pull) {
+	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
+	unsigned int gpio_num = GPIO_NUM(pin);
+	unsigned int bank = GPIO_BANK(gpio_num);
+	unsigned int offset = gpio_num % 32;
 
 	if (pmu == 0 || iomux == 0) {
 		return -1;
 	}
 
 	if (pin < RK30_PIN0_PB4) {
-		uint32_t *base = (uint32_t *) (pmu + PMU_GPIO0A_PULL
+		unsigned int *base = (unsigned int *) (pmu + PMU_GPIO0A_PULL
 				+ ((offset / 8) * 4));
 		offset = (offset % 8) * 2;
 
-		uint32_t value = *base;
+		unsigned long value = *base;
 		value &= ~(0x03 << offset);
 		value |= (0x03 << (16 + offset) | (pull << offset));
 		*base = value;
 	} else {
-		uint32_t *base = (uint32_t *) (iomux + GRF_GPIO0B_PULL - 4
+		unsigned int *base = (unsigned int *) (iomux + GRF_GPIO0B_PULL - 4
 				+ bank * 16 + ((offset / 8) * 4));
-#if 0
-		printf("BASE: %p -> %x\n", base, *base);
-#endif
-		offset = (7 - (offset % 8)) * 2;
-#if 0
-		printf("OFFSET: %d\n", offset);
-#endif
-		uint32_t value = *base;
+
+		unsigned long value = *base;
 		value &= ~(0x03 << offset);
 		value |= ((0x03 << (16 + offset)) | (pull << offset));
 		*base = value;
 	}
-
+	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 	return 0;
 
 }
 #endif
 
 
-int16_t gpio_set_cfgpin(uint16_t pin, uint16_t val) {
+int gpio_set_cfgpin(unsigned int pin, unsigned int val) {
 
-	uint16_t gpio_num = GPIO_NUM(pin);
+	unsigned int gpio_num = GPIO_NUM(pin);
 #if defined(RK3188)
-	uint16_t bank = GPIO_BANK(gpio_num);
-	uint16_t offset = GPIO_OFFSET(gpio_num);
+	unsigned int bank = GPIO_BANK(gpio_num);
+	unsigned int offset = GPIO_OFFSET(gpio_num);
 #elif defined(AM3352)
-	uint16_t bank = GPIO_BANK(pin);
-	uint32_t offset = 1 << gpio_num;
+	unsigned int bank = GPIO_BANK(pin);
+	unsigned long offset = 1 << gpio_num;
 #endif
 
 	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
@@ -216,15 +208,16 @@ int16_t gpio_set_cfgpin(uint16_t pin, uint16_t val) {
 	return 0;
 }
 
-int16_t gpio_get_cfgpin(uint16_t pin) {
+int gpio_get_cfgpin(unsigned int pin) {
 
-	uint16_t gpio_num = GPIO_NUM(pin);
+	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
+	unsigned int gpio_num = GPIO_NUM(pin);
 #if defined(RK3188)
-	uint16_t bank = GPIO_BANK(gpio_num);
-	uint16_t offset = GPIO_OFFSET(gpio_num);
+	unsigned int bank = GPIO_BANK(gpio_num);
+	unsigned int offset = GPIO_OFFSET(gpio_num);
 #elif defined(AM3352)
-	uint16_t bank = GPIO_BANK(pin);
-	uint16_t offset = 1 << gpio_num;
+	unsigned int bank = GPIO_BANK(pin);
+	unsigned int offset = 1 << gpio_num;
 #endif
 
 	if (gpio[bank].gpio_pio_base == 0) {
@@ -232,21 +225,24 @@ int16_t gpio_get_cfgpin(uint16_t pin) {
 	}
 
 	struct gpio_reg *pio = ((struct gpio_reg *) gpio[bank].gpio_pio_base);
+	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 #if defined(RK3188)
 	return !!(pio->gpio_swport_ddr & offset);
 #elif defined(AM3352)
 	return !!(pio->gpio_oe & offset);
 #endif
 }
-int16_t gpio_output(uint16_t pin, uint16_t val) {
+int gpio_output(unsigned int pin, unsigned int val) {
+	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
 
-	uint16_t gpio_num = GPIO_NUM(pin);
+
+	unsigned int gpio_num = GPIO_NUM(pin);
 #if defined(RK3188)
-	uint16_t bank = GPIO_BANK(gpio_num);
-	uint16_t offset = GPIO_OFFSET(gpio_num);
+	unsigned int bank = GPIO_BANK(gpio_num);
+	unsigned int offset = GPIO_OFFSET(gpio_num);
 #elif defined(AM3352)
-	uint16_t bank = GPIO_BANK(pin);
-	uint16_t offset = 1 << gpio_num;
+	unsigned int bank = GPIO_BANK(pin);
+	unsigned int offset = 1 << gpio_num;
 #endif
 	if (gpio[bank].gpio_pio_base == 0) {
 		return -1;
@@ -268,18 +264,20 @@ int16_t gpio_output(uint16_t pin, uint16_t val) {
 #endif
 	}
 
+	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 	return 0;
 }
 
-int16_t gpio_input(uint16_t pin) {
+int gpio_input(unsigned int pin) {
 
-	uint16_t gpio_num = GPIO_NUM(pin);
+	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
+	unsigned int gpio_num = GPIO_NUM(pin);
 #if defined(RK3188)
-	uint16_t bank = GPIO_BANK(gpio_num);
-	uint16_t offset = GPIO_OFFSET(gpio_num);
+	unsigned int bank = GPIO_BANK(gpio_num);
+	unsigned int offset = GPIO_OFFSET(gpio_num);
 #elif defined(AM3352)
-	uint16_t bank = GPIO_BANK(pin);
-	uint16_t offset = 1 << gpio_num;
+	unsigned int bank = GPIO_BANK(pin);
+	unsigned int offset = 1 << gpio_num;
 #endif
 
 	if (gpio[bank].gpio_pio_base == 0) {
@@ -288,6 +286,7 @@ int16_t gpio_input(uint16_t pin) {
 
 	struct gpio_reg *pio = ((struct gpio_reg *) gpio[bank].gpio_pio_base);
 
+	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 #if defined(RK3188)
 	return !!(pio->gpio_ext_port & offset);
 #elif defined(AM3352)

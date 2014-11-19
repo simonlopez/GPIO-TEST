@@ -1,15 +1,8 @@
 #ifndef _BOARD_RK3188_SOM_H
 #define _BOARD_RK3188_SOM_H
 
-#include "gpio_lib.h"
+#include "RK3188.h"
 #include "test.h"
-
-
-
-
-#define PINN(port, pin)	RK30_PIN ## port ## _P ## pin
-#define PIN(port, pin)	PINN(port, pin)
-
 
 gpio_t uext1[] = {
 		{"GPIO1_A1/UART0_TX",	PIN(1,A1), "UEXT-1", 3},

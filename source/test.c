@@ -28,9 +28,10 @@
 #include "gpio_lib.h"
 #include "color.h"
 
-#include "board_AM3352-SOM.h"
 
 int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
+
+	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
 
 	int fail = 0;
 	int i;
@@ -40,20 +41,11 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 	printf("\n%sTest %s%s\n", WHITE, name, ESC);
 	printf("--------------------\n");
 
+
 	if (gpio_init())
 		return 0;
 
-	gpio_set_cfgpin(PIN(3, 20), GPIO_OUTPUT);
-	gpio_set_cfgpin(PIN(3, 21), GPIO_OUTPUT);
 
-	while(1){
-		gpio_output(PIN(3, 20), 1);
-		gpio_output(PIN(3, 21), 0);
-		sleep(1);
-		gpio_output(PIN(3, 20), 0);
-		gpio_output(PIN(3, 21), 1);
-		sleep(1);
-	}
 
 #if defined(RK3188)
 	/* If using RK3188 make all needed pins as gpio */
@@ -64,6 +56,7 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 		usleep(delay);
 	}
 #endif
+
 	/* 1. Pull-Pin output */
 	gpio_set_cfgpin(pullpin.pin, GPIO_OUTPUT);
 
