@@ -23,7 +23,6 @@ else
 $(error No matching board)
 endif
 
-
 ifdef CC
 COMPILER = $(CC)
 else
@@ -41,7 +40,7 @@ OBJDIR = obj
 BINDIR = bin
 BRDDIR = boards
 
-CFLAGS = -Wall -std=c99 -D $(CHIP) -D $(BOARD) -I./$(INCDIR)/ -I./$(BRDDIR)
+CFLAGS = -Wall -std=c99 -D $(CHIP) -D $(BOARD) -D __DEBUG -I./$(INCDIR)/ -I./$(BRDDIR)
 LINKER = $(COMPILER) -o
 LFLAGS = -Wall -I./$(INCDIR)/ -I./$(BRDDIR)
 

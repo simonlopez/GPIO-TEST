@@ -20,7 +20,7 @@
 
 //#define __DEBUG
 #ifdef __DEBUG
-#define debug(...) printf(__VA_ARGS__)
+#define debug(...) printf(__VA_ARGS__); getchar()
 #else
 #define debug(...)
 #endif

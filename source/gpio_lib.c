@@ -35,7 +35,6 @@ int gpio_init(void) {
 	unsigned int PageSize, PageMask;
 	void *pc;
 
-	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
 
 	fd = open("/dev/mem", O_RDWR | O_SYNC);
 	if (fd < 0) {
@@ -45,9 +44,6 @@ int gpio_init(void) {
 
 	PageSize = sysconf(_SC_PAGESIZE);
 	PageMask = (~(PageSize - 1));
-
-	debug("%sPageSize%s: %d\n", BOLD_WHITE, ESC, PageSize);
-	debug("%sPageMask%s: 0x%08x\n", BOLD_WHITE, ESC, PageMask);
 
 	unsigned char i;
 	for (i = 0; i < 4; i++) {
@@ -63,13 +59,13 @@ int gpio_init(void) {
 		pc = (void *) mmap(0, PageSize, PROT_READ | PROT_WRITE, MAP_SHARED,
 				fd, addr_start);
 #endif
+
 		if (pc == MAP_FAILED) {
 			return (-1);
 		}
 
 		gpio[i].gpio_pio_base = (unsigned int) pc;
 		gpio[i].gpio_pio_base += addr_offset;
-		debug("%p mapped at: %p\n", (void *)gpio[i].swgpio_io_base, (void *)gpio[i].gpio_pio_base);
 	}
 
 #if defined(RK3188)
@@ -81,7 +77,6 @@ int gpio_init(void) {
 
 	iomux = (unsigned int) pc;
 	iomux += addr_offset;
-	debug("%p mapped at: %p\n", (void *)GPIO_GRF_BASE, (void *)iomux);
 
 	addr_start = RK30_PMU_BASE & PageMask;
 	addr_offset = RK30_PMU_BASE & ~PageMask;
@@ -91,21 +86,18 @@ int gpio_init(void) {
 
 	pmu = (unsigned int) pc;
 	pmu += addr_offset;
-	debug("%p mapped at: %p\n", (void *)RK30_PMU_BASE, (void *)pmu);
 #endif
 
 	close(fd);
-
-	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 
 	return 0;
 }
 #if defined(RK3188)
 int gpio_make_gpio(unsigned int pin) {
-	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
 	unsigned int gpio_num = GPIO_NUM(pin);		//23
 	unsigned int bank = GPIO_BANK(gpio_num);	// 0
 	unsigned int offset = (gpio_num % 32) / 8;			// 2
+
 
 	if (iomux == 0) {
 		return -1;
@@ -113,7 +105,7 @@ int gpio_make_gpio(unsigned int pin) {
 
 	//0x20008060 + bank*0x10 + 4*(gpio_num / 8)
 	unsigned int *ptr = (unsigned int *) (iomux + GPIO_GRF_IOMUX + bank * 16
-				+ 4 * offset);
+			+ 4 * offset);
 
 	unsigned long value = *((unsigned long *) ptr)
 			& ~(0x03 << 2 * (gpio_num % 8));
@@ -121,12 +113,10 @@ int gpio_make_gpio(unsigned int pin) {
 
 	*((unsigned long*) ptr) = value;
 
-	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 	return 0;
 }
 
 int gpio_set_pullup(unsigned int pin, unsigned int pull) {
-	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
 	unsigned int gpio_num = GPIO_NUM(pin);
 	unsigned int bank = GPIO_BANK(gpio_num);
 	unsigned int offset = gpio_num % 32;
@@ -147,13 +137,14 @@ int gpio_set_pullup(unsigned int pin, unsigned int pull) {
 	} else {
 		unsigned long *base = (unsigned long *) (iomux + GRF_GPIO0B_PULL - 4
 				+ bank * 16 + ((offset / 8) * 4));
+		
+		offset = (7 - (offset % 8)) * 2;
 
 		unsigned long value = *base;
 		value &= ~(0x03 << offset);
 		value |= ((0x03 << (16 + offset)) | (pull << offset));
 		*base = value;
 	}
-	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 	return 0;
 
 }
@@ -171,46 +162,30 @@ int gpio_set_cfgpin(unsigned int pin, unsigned int val) {
 	unsigned long offset = 1 << gpio_num;
 #endif
 
-	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
-
 	if (gpio[bank].gpio_pio_base == 0) {
 		return -1;
 	}
-
-	debug("%sgpio[%d]%s: %p\n", BOLD_WHITE, bank, ESC, (void *)gpio[bank].gpio_pio_base);
-
 	struct gpio_reg *pio = ((struct gpio_reg *) gpio[bank].gpio_pio_base);
-
-	debug("%spio%s: %p\n", BOLD_WHITE, ESC, (void *)pio);
-
-	debug("%s%p%s -> 0x%08x\n", BOLD_WHITE, (void *)gpio[bank].gpio_pio_base, ESC, 0);
-
-
 	if (val == GPIO_INPUT) {
-		debug("Setiing input\n");
 #if defined(RK3188)
 		pio->gpio_swport_ddr &= ~offset;
 #elif defined(AM3352)
 		pio->gpio_oe |= offset;
 #endif
 	} else {
-		debug("Setting output\n");
 #if defined(RK3188)
 		pio->gpio_swport_ddr |= offset;
 #elif defined(AM3352)
-//		pio->gpio_oe &= ~offset;
-//		debug("gpio_oe: %p\n", pio->gpio_oe);
+		pio->gpio_oe &= ~offset;
+
 #endif
 	}
-
-	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 
 	return 0;
 }
 
 int gpio_get_cfgpin(unsigned int pin) {
 
-	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
 	unsigned int gpio_num = GPIO_NUM(pin);
 #if defined(RK3188)
 	unsigned int bank = GPIO_BANK(gpio_num);
@@ -225,7 +200,6 @@ int gpio_get_cfgpin(unsigned int pin) {
 	}
 
 	struct gpio_reg *pio = ((struct gpio_reg *) gpio[bank].gpio_pio_base);
-	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 #if defined(RK3188)
 	return !!(pio->gpio_swport_ddr & offset);
 #elif defined(AM3352)
@@ -233,10 +207,9 @@ int gpio_get_cfgpin(unsigned int pin) {
 #endif
 }
 int gpio_output(unsigned int pin, unsigned int val) {
-	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
-
 
 	unsigned int gpio_num = GPIO_NUM(pin);
+
 #if defined(RK3188)
 	unsigned int bank = GPIO_BANK(gpio_num);
 	unsigned int offset = GPIO_OFFSET(gpio_num);
@@ -254,6 +227,7 @@ int gpio_output(unsigned int pin, unsigned int val) {
 #if defined(RK3188)
 		pio->gpio_swport_dr &= ~offset;
 #elif defined(AM3352)
+		_debug()
 		pio->gpio_cleardataout = offset;
 #endif
 	} else {
@@ -264,13 +238,11 @@ int gpio_output(unsigned int pin, unsigned int val) {
 #endif
 	}
 
-	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 	return 0;
 }
 
 int gpio_input(unsigned int pin) {
 
-	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
 	unsigned int gpio_num = GPIO_NUM(pin);
 #if defined(RK3188)
 	unsigned int bank = GPIO_BANK(gpio_num);
@@ -286,7 +258,6 @@ int gpio_input(unsigned int pin) {
 
 	struct gpio_reg *pio = ((struct gpio_reg *) gpio[bank].gpio_pio_base);
 
-	debug("exit: %s%s%s\n\n", BOLD_YELLOW, __func__, ESC);
 #if defined(RK3188)
 	return !!(pio->gpio_ext_port & offset);
 #elif defined(AM3352)

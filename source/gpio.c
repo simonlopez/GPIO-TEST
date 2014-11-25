@@ -49,6 +49,13 @@ int main(int argc, char **argv)
 
 	gpio_set_cfgpin(116, GPIO_OUTPUT);
 
+	while(1){
+		gpio_output(116, 1);
+		sleep(1);
+		gpio_output(116, 0);
+		sleep(1);
+	}
+
 
 #elif defined (RK3188_SOM)
 	test("UEXT-1", uext1, uext1_pp, sizeof(uext1)/sizeof(gpio_t));

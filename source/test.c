@@ -38,7 +38,6 @@ static const char padder[] = "........................................";
 
 int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 
-	debug("enter: %s%s%s\n", UL_CYAN, __func__, ESC);
 
 	int fail = 0;
 	int i;
@@ -57,8 +56,9 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 
 	for (i = 0; i < n; i++) {
 		gpio_make_gpio(connector[i].pin);
-		usleep(delay);
+//		pthread_create(&thread[i], &attr, gpio_make_gpio, (void *)connector[i].pin);
 	}
+	usleep(delay);
 #endif
 
 	/* 1. Pull-Pin output */
