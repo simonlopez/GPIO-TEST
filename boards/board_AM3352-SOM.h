@@ -14,7 +14,7 @@ gpio_t uext1[] = {
 		{"P3_5/I2C0-SDA",	PIN(3,5), "UEXT-1", 6},
 		{"P0_3/SPI0_D0(MISO)",	PIN(0,3), "UEXT-1", 7},
 		{"P0_4/SPI0_D1(MOSI)",	PIN(0,4), "UEXT-1", 8},
-		{"P0_2/SPI0_SCLK",	PIN(0,2), "UEXT-1", 9},
+	//	{"P0_2/SPI0_SCLK",	PIN(0,2), "UEXT-1", 9},
 		{"P0_5/SPI0_CS0",	PIN(0,5), "UEXT-1", 10},
 };
 
@@ -63,7 +63,7 @@ gpio_t uext2[] = {
 //
 //};
 
-//gpio_t uext1_pp = {"GPIO1_A6/SPI0_SCK",	PIN(1,A6), "UEXT-1", 9};
+gpio_t uext1_pp = {"P0_2/SPI0_SCLK",	PIN(0,2), "UEXT-1", 9};
 //gpio_t uext2_pp = {"GPIO0_D6/SPI1_CLK", PIN(0,D6), "UEXT-2", 9};
 //gpio_t ext1_pp = {"GPIO0_B4/LED1",		PIN(0, B4), "EXT1", 18};
 

@@ -42,19 +42,26 @@ int main(int argc, char **argv)
 	printf("AM3352-SOM TEST\n");
 #endif
 
-#if defined (AM3352_SOM)
 	if(gpio_init() < 0){
-		printf("Error gpio init\n");
+			printf("Error gpio init\n");
 	}
 
-	gpio_set_cfgpin(116, GPIO_OUTPUT);
+#if defined (AM3352_SOM)
 
-	while(1){
-		gpio_output(116, 1);
-		sleep(1);
-		gpio_output(116, 0);
-		sleep(1);
-	}
+
+//	gpio_set_cfgpin(116, GPIO_OUTPUT);
+////	gpio_set_cfgpin(117, GPIO_INPUT);
+//
+////	gpio_get_mux(116);
+////	gpio_set_mux(116, 7);
+////
+//	while(1){
+//		gpio_output(116, 1);
+//		sleep(1);
+//		gpio_output(116, 0);
+//		sleep(1);
+//	}
+	test("UEXT-1", uext1, uext1_pp, sizeof(uext1)/sizeof(gpio_t));
 
 
 #elif defined (RK3188_SOM)
@@ -62,7 +69,6 @@ int main(int argc, char **argv)
 	test("UEXT-2", uext2, uext2_pp, sizeof(uext2)/sizeof(gpio_t));
 	test("EXT-1", ext1, ext1_pp, sizeof(ext1)/sizeof(gpio_t));
 	test("EXT-2", ext2, ext2_pp, sizeof(ext2)/sizeof(gpio_t));
-
 
 #endif
 

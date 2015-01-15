@@ -171,4 +171,27 @@
 #define PIN(port, pin)	PINN(port, pin)
 
 
+struct gpio_int {
+	unsigned long gpio_inten;			// @ 0x30
+	unsigned long gpio_intmask;			// @ 0x34
+	unsigned long gpio_inttype_level;	// @ 0x38
+	unsigned long gpio_int_polarity;	// @ 0x3c
+	unsigned long gpio_int_status;		// @ 0x40
+	unsigned long gpio_int_rawstatus;	// @ 0x44
+	unsigned long gpio_debounce;		// @ 0x48
+	unsigned long gpio_ports_eoi;		// @ 0x4c
+
+};
+struct gpio_reg {
+	unsigned long gpio_swport_dr;		// @ 0x00
+	unsigned long gpio_swport_ddr;		// @ 0x04
+	unsigned long res[10];				// Reserved memory
+	struct gpio_int gpio_int;
+	unsigned long gpio_ext_port;		// @ 0x50
+	unsigned long rsrv[3];
+	unsigned long gpio_ls_sync;			// @ 0x60;
+};
+
+
+
 #endif
