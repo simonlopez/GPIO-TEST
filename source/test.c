@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "test.h"
 #include "gpio_lib.h"
@@ -42,7 +43,8 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 	int fail = 0;
 	int i;
 	int j;
-	int delay = 10000;
+	int q,z;
+	unsigned delay = 10000;
 
 	printf("\n%sTesting%s %s%s%s\n", BOLD_WHITE, ESC, UL_YELLOW, name, ESC);
 	printf("--------------------\n");
@@ -82,15 +84,26 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 	usleep(delay);
 
 	/* 4. Read inputs */
+	z = 0;
 	for (i = 0; i < n; i++) {
 		if (!gpio_input(connector[i].pin)) {
-			//GND short
-			if (!fail) {
-				print_fail();
-				fail = 1;
+
+			for(q = 0; q < 5; q++){
+				if (!gpio_input(connector[i].pin))
+					z++;
+				usleep(delay);
 			}
-			printf("\t%s%s(%s:%d)%s -> GND SHORT\n", BOLD_CYAN,
-					connector[i].name, connector[i].ext, connector[i].con, ESC);
+			if(z == 5){
+				//GND short
+				if (!fail) {
+					print_fail();
+					fail = 1;
+				}
+				printf("\t%s%s%s(%s%s:%d%s -> %s%s:%d%s) -> GND SHORT\n", BOLD_CYAN,
+						connector[i].name, ESC, BOLD_BLUE, connector[i].ext, connector[i].con, ESC,
+						BOLD_PURPLE, connector[i].ext_som, connector[i].con_som, ESC);
+				getchar();
+			}
 		}
 	}
 	if (!fail) {
@@ -98,7 +111,8 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 	} else {
 		goto fail;
 	}
-	fail = 0;
+	fail =0;
+	z = 0;
 
 	/* 5. Pull-Pin Low */
 	_print("Pull pin low");
@@ -108,13 +122,21 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 	/* 6. Read inputs */
 	for (i = 0; i < n; i++) {
 		if (gpio_input(connector[i].pin)) {
-			//VCC short
-			if (!fail) {
-				print_fail();
-				fail = 1;
+			for(q = 0; q < 5; q++){
+				if (gpio_input(connector[i].pin))
+					z++;
+				usleep(delay);
 			}
-			printf("\t%s%s(%s:%d)%s -> VCC SHORT\n", BOLD_CYAN,
-					connector[i].name, connector[i].ext, connector[i].con, ESC);
+			if(z == 5){
+				//VCC short
+				if (!fail) {
+					print_fail();
+					fail = 1;
+				}
+				printf("\t%s%s(%s:%d)%s -> VCC SHORT\n", BOLD_CYAN,
+						connector[i].name, connector[i].ext, connector[i].con, ESC);
+				getchar();
+			}
 		}
 	}
 
@@ -123,6 +145,7 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 	else
 		goto fail;
 	fail = 0;
+	z = 0;
 
 	/* 7. Running zero */
 	_print("Running zero");
@@ -138,17 +161,27 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 			if (i == j)
 				continue;
 			if (!gpio_input(connector[j].pin)) {
-				if (!fail) {
-					print_fail();
-					fail = 1;
+				for(q = 0; q < 5; q++){
+					if (!gpio_input(connector[i].pin))
+						z++;
+					usleep(delay);
 				}
-				printf("\t%s%s(%s:%d)%s -> %s%s(%s:%d)%s  SHORT\n",
-				BOLD_CYAN, connector[i].name, connector[i].ext,
-						connector[i].con,
-						ESC,
-						BOLD_CYAN, connector[j].name, connector[i].ext,
-						connector[j].con,
-						ESC);
+
+				if(z == 5){
+
+					if (!fail) {
+						print_fail();
+						fail = 1;
+					}
+					printf("\t%s%s(%s:%d)%s -> %s%s(%s:%d)%s  SHORT\n",
+					BOLD_CYAN, connector[i].name, connector[i].ext,
+							connector[i].con,
+							ESC,
+							BOLD_CYAN, connector[j].name, connector[i].ext,
+							connector[j].con,
+							ESC);
+					getchar();
+				}
 			}
 		}
 		gpio_set_cfgpin(connector[i].pin, GPIO_INPUT);
@@ -173,19 +206,27 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 			if (i == j)
 				continue;
 			if (gpio_input(connector[j].pin)) {
-				if (!fail) {
-					print_fail();
-					fail = 1;
-
+				for(q = 0; q < 5; q++){
+					if (gpio_input(connector[i].pin))
+						z++;
+					usleep(delay);
 				}
-				printf("\t%s%s(%s:%d)%s -> %s%s(%s:%d)%s  SHORT\n",
-				BOLD_CYAN, connector[i].name, connector[i].ext,
-						connector[i].con,
-						ESC,
-						BOLD_CYAN, connector[j].name, connector[i].ext,
-						connector[j].con,
-						ESC);
 
+				if(z == 5){
+
+					if (!fail) {
+						print_fail();
+						fail = 1;
+					}
+					printf("\t%s%s(%s:%d)%s -> %s%s(%s:%d)%s  SHORT\n",
+					BOLD_CYAN, connector[i].name, connector[i].ext,
+							connector[i].con,
+							ESC,
+							BOLD_CYAN, connector[j].name, connector[i].ext,
+							connector[j].con,
+							ESC);
+					getchar();
+				}
 			}
 		}
 		gpio_set_cfgpin(connector[i].pin, GPIO_INPUT);
@@ -196,7 +237,7 @@ int test(char *name, gpio_t connector[], gpio_t pullpin, int n) {
 		goto fail;
 	fail = 0;
 
-	fail: return 0;
+	fail: return 0;;
 
 }
 

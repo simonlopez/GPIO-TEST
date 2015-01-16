@@ -62,6 +62,7 @@ int main(int argc, char **argv)
 //		sleep(1);
 //	}
 	test("UEXT-1", uext1, uext1_pp, sizeof(uext1)/sizeof(gpio_t));
+	test("UEXT-2", uext2, uext2_pp, sizeof(uext2)/sizeof(gpio_t));
 
 
 #elif defined (RK3188_SOM)
